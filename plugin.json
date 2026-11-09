@@ -1,0 +1,100 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "erateradar",
+  "version": "1.0.0",
+  "description": "erateradar connects Claude and ChatGPT to public USAC E-rate data for IT, network and cabling providers. Ask for open Category 2 Form 470s (school and library Wi-Fi, switches, cabling, firewalls, UPS) within up to 60 miles of a ZIP or city, or in a state; open one Form 470 with every requested line item as USAC lists it; or see what a buyer reported on its previous request: bids received, the provider it chose, the pre-discount cost and the USAC status. Every row links to its USAC Open Data record and to the same list in the erateradar web app. All tools are read-only and answer in pages of at most 25 rows. USAC records are self-reported and do not promise a purchase or a winning bid.",
+  "author": {
+    "name": "Helios One Oy",
+    "email": "hello@erateradar.com",
+    "url": "https://erateradar.com"
+  },
+  "homepage": "https://erateradar.com",
+  "repository": "https://github.com/Helios-One-Oy/erateradar-mcp",
+  "keywords": [],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "erateradar",
+        "shortDescription": "Find open E-rate bids (USAC)",
+        "longDescription": "erateradar connects Claude and ChatGPT to public USAC E-rate data for IT, network and cabling providers. Ask for open Category 2 Form 470s (school and library Wi-Fi, switches, cabling, firewalls, UPS) within up to 60 miles of a ZIP or city, or in a state; open one Form 470 with every requested line item as USAC lists it; or see what a buyer reported on its previous request: bids received, the provider it chose, the pre-discount cost and the USAC status. Every row links to its USAC Open Data record and to the same list in the erateradar web app. All tools are read-only and answer in pages of at most 25 rows. USAC records are self-reported and do not promise a purchase or a winning bid.",
+        "developerName": "Helios One Oy",
+        "category": "Business & Operations",
+        "capabilities": [
+          "Find open Form 470s",
+          "Get a Form 470",
+          "Get applicant history"
+        ],
+        "websiteURL": "https://erateradar.com",
+        "supportURL": "https://erateradar.com/docs/mcp",
+        "privacyPolicyURL": "https://erateradar.com/security#mcp",
+        "termsOfServiceURL": "https://erateradar.com/terms",
+        "defaultPrompt": [
+          "Find open E-rate network bids within 60 miles of ZIP 60601, nearest first.",
+          "Show me Form 470 270003649.",
+          "Which public libraries have open E-rate network bids, and who did each one pick last time?"
+        ],
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Checks that “Find open E-rate switch and Wi-Fi bids within 60 miles of ZIP 60601.” returns A count of open Category 2 Form 470s within 60 miles of ZIP 60601 that request switches or wireless access points (USAC data date shown), then up to 10 rows: buyer, city, the engine's one-line summary, miles, earliest contract date and the USAC record link; total and nextOffset when there are more; a link to the same list in the web app..",
+              "prompt": "Find open E-rate switch and Wi-Fi bids within 60 miles of ZIP 60601.",
+              "expected_behavior": "A count of open Category 2 Form 470s within 60 miles of ZIP 60601 that request switches or wireless access points (USAC data date shown), then up to 10 rows: buyer, city, the engine's one-line summary, miles, earliest contract date and the USAC record link; total and nextOffset when there are more; a link to the same list in the web app.",
+              "tools_triggered": "find_open_470s"
+            },
+            {
+              "description": "Checks that “Which school network bids near Sacramento, CA can sign a contract in the next 30 days?” returns Open Category 2 Form 470s within 60 miles of Sacramento whose allowable contract date is within 30 days, each with its date and USAC link; or an honest 0 if none..",
+              "prompt": "Which school network bids near Sacramento, CA can sign a contract in the next 30 days?",
+              "expected_behavior": "Open Category 2 Form 470s within 60 miles of Sacramento whose allowable contract date is within 30 days, each with its date and USAC link; or an honest 0 if none.",
+              "tools_triggered": "find_open_470s"
+            },
+            {
+              "description": "Checks that “Show me Form 470 270003649.” returns Ionia Community Library (Ionia, MI): its open Form 470 #270003649, every requested Category 2 line item as USAC lists it (e.g. wireless access points, switches, firewall), the allowable contract date (December 2, 2026), its previous request, and the USAC record links. If the 470 has since closed, it says it isn't in the current list..",
+              "prompt": "Show me Form 470 270003649.",
+              "expected_behavior": "Ionia Community Library (Ionia, MI): its open Form 470 #270003649, every requested Category 2 line item as USAC lists it (e.g. wireless access points, switches, firewall), the allowable contract date (December 2, 2026), its previous request, and the USAC record links. If the 470 has since closed, it says it isn't in the current list.",
+              "tools_triggered": "get_470"
+            },
+            {
+              "description": "Checks that “What did Ionia Community Library do on its last E-rate network request?” returns On its FY2024 Internal Connections request it reported 2 bids and chose Nicholas Heimler: $3,718.00 pre-discount cost; USAC status Funded (FRN 2499001028), with the USAC record link..",
+              "prompt": "What did Ionia Community Library do on its last E-rate network request?",
+              "expected_behavior": "On its FY2024 Internal Connections request it reported 2 bids and chose Nicholas Heimler: $3,718.00 pre-discount cost; USAC status Funded (FRN 2499001028), with the USAC record link.",
+              "tools_triggered": "get_applicant_history"
+            },
+            {
+              "description": "Checks that “List open E-rate cabling bids in Texas.” returns The count of open Category 2 Form 470s in Texas that request cabling, soonest signing date first, a page of up to 10 rows with USAC links, and nextOffset for the rest..",
+              "prompt": "List open E-rate cabling bids in Texas.",
+              "expected_behavior": "The count of open Category 2 Form 470s in Texas that request cabling, soonest signing date first, a page of up to 10 rows with USAC links, and nextOffset for the rest.",
+              "tools_triggered": "find_open_470s"
+            }
+          ],
+          "negative": [
+            {
+              "description": "Does not act on “Book me a flight from Austin to Denver next Friday.”; it gives No erateradar tool is called; the request has nothing to do with E-rate bids..",
+              "prompt": "Book me a flight from Austin to Denver next Friday.",
+              "expected_behavior": "No erateradar tool is called; the request has nothing to do with E-rate bids."
+            },
+            {
+              "description": "Does not act on “Submit our bid to Roseville City Elementary School District's Form 470 and email their contact.”; it gives No tool submits or sends anything: erateradar is read-only. The assistant explains it can't submit bids or contact buyers (it may look the 470 up with get_470 for information only)..",
+              "prompt": "Submit our bid to Roseville City Elementary School District's Form 470 and email their contact.",
+              "expected_behavior": "No tool submits or sends anything: erateradar is read-only. The assistant explains it can't submit bids or contact buyers (it may look the 470 up with get_470 for information only)."
+            },
+            {
+              "description": "Does not act on “Write a cover letter for a teaching job at Chicago Public Schools.”; it gives No erateradar tool is called; it is not an E-rate bid question..",
+              "prompt": "Write a cover letter for a teaching job at Chicago Public Schools.",
+              "expected_behavior": "No erateradar tool is called; it is not an E-rate bid question."
+            }
+          ]
+        },
+        "demo_recording_url": "",
+        "commerce": false,
+        "commerce_description": "This MCP connector provides data lookup and analysis only; it does not sell products or process payments."
+      },
+      "publication": {
+        "release_notes": "1.0: three read-only tools over USAC E-rate data (find open Category 2 Form 470s near a place or in a state, one Form 470 with its USAC line items, a buyer's previous request), OAuth 2.1 with dynamic client registration and PKCE, sign-up inside the consent page."
+      }
+    }
+  }
+}
